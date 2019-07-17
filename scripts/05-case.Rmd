@@ -1,9 +1,8 @@
 ---
-title: "IMDB"
+title: "Dashboard de vôos"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
-    theme: journal
 editor_options: 
   chunk_output_type: console
 ---
@@ -12,7 +11,9 @@ editor_options:
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
-imdb <- read_rds("../dados/imdb.rds")
+library(lubridate)
+library(ggridges)
+library(nycflights13)
 ```
 
 Visão geral
@@ -21,136 +22,115 @@ Visão geral
 Row {data-height=110}
 ----------------------------------------------------------------------
 
-### O problema
+### O objetivo
 
-O estúdio de filmes FilmR precisa escolher um(a) diretor(a) e um(a) protagonista para o seu próximo filme. Para isso ele conduziu uma análise exploratória em uma base de dados com diversas informações de quase 4 mil filmes lançados nos Estados Unidos desde 1916. O objetivo da FilmR é identificar os diretores e atores que trariam o maior retorno financeiro para a produtora. 
+Visualizar dados relacionados aos vôos que ocorreram em Nova York durante
+o ano de 2013 procurando entender a relação entre os atrasos, o clima e
+outras variáveis.
 
 Row
 -----------------------------------------------------------------------
 
-### Filmes
+### # vôos
 
 ```{r}
-
+valueBox(
+  scales::comma(nrow(flights), big.mark = ".", decimal.mark = ","), 
+  icon = "fa-fighter-jet"
+)
 ```
 
-### # Diretores
+### # destinos
 
 ```{r}
-
+valueBox(
+  scales::comma(n_distinct(flights$dest), big.mark = ".", decimal.mark = ","), 
+  icon = "fa-warehouse"
+)
 ```
 
-### # Atores
+### # companhias aéreas
 
 ```{r}
-
+valueBox(
+  scales::comma(n_distinct(flights$carrier), big.mark = ".", decimal.mark = ","), 
+  icon = "fa-random"
+)
 ```
 
 Row
 --------------------------------------------------------------
 
-### Relação entre nota e lucro
+### Quantidade de vôos por mês
 
 ```{r}
-imdb <- imdb %>% mutate(lucro = receita - orcamento)
-
-
+p <- flights %>% 
+  mutate(data = ymd(paste(year, month, day))) %>% 
+  group_by(month(data)) %>% 
+  summarise(n = n(), data = min(data)) %>% 
+  ggplot(aes(x = data, y = n)) +
+  geom_col(fill = "lightblue") +
+  theme_minimal() +
+  labs(x = "Data", y = "# de Vôos")
+plotly::ggplotly(p)
 ```
 
-> Parece que se a nota é inferiror a uns 7, ela não é muito relacionada ao lucro do filme.
-Mas em geral filmes com notas bem altas lucram mais do que os outros.
+> Quantidade de vôos bem parecida durante todo o ano. Nada muito diferente para notar.
 
-### Relação entre o orçamento e lucro
+### Vôos por dia da semana
 
 ```{r}
-
+p <- flights %>% 
+  mutate(data = ymd(paste(year, month, day))) %>% 
+  group_by(dds = wday(data, label = TRUE)) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(x = dds, y = n)) +
+  geom_col(fill = "lightblue") +
+  theme_minimal() +
+  labs(x = "Data", y = "# de Vôos")
+plotly::ggplotly(p)
 ```
 
----
+> Durante a semana os vôos são distribuidos parecidamente, exceto pelo final de 
+semana onde acontecem menos vôos.
 
-> Filmes com maior orçamento têm maior possibilidade de prejuizo. Essas duas variáveis não são fortemente correlacionadas.
 
-Gêneros
+Companhias Aéreas
 ==============================================================
-
 
 Row
 ---------------------------------------------------------------
 
-### Lucro por gênero
+### Companhias aéreas e atrasos
 
 ```{r}
-
+p <- flights %>% 
+  group_by(carrier) %>% 
+  summarise(prop_delay = mean(arr_delay > 30, na.rm = TRUE)) %>% 
+  ggplot(aes(y = prop_delay, x = carrier)) + 
+  geom_segment( aes(x=fct_reorder(carrier, prop_delay), xend=carrier, y=0, yend=prop_delay), color="black") +
+  geom_point(color="blue", size=4) +
+  coord_flip() +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent) + 
+  labs(y = "Proporção de vôos em atraso", x = "Companhia Aérea")
+plotly::ggplotly(p)
 ```
 
-> O lucro mediano dos filmes parece ser bem parecido entre os principais gêneros. No entanto, parece que alguns gêneros tem bem mais filmes que estouraram.
+> Consideramos como atrasos os vôos que chegaram pelo menos 30 minutos depois
+da data hora prevista de chegada.
 
-### Filmes que estouraram
+### Distribuição dos atrrasos
 
 ```{r}
-calcula_valor_corte <- function(x) {
- quartis <- quantile(x, c(0.25,0.5,0.75), na.rm = TRUE)
- quartis[2] + 2*(quartis[3] - quartis[1])
-}
-
+p <- flights %>% 
+  filter(dep_delay > 30) %>% 
+  ggplot(aes(x = fct_reorder(carrier, dep_delay), y = dep_delay)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_flip(ylim = c(30, 300)) +
+  theme_minimal()
+plotly::ggplotly(p)
 ```
 
 > Vemos que os filmes de animação tem a maior chance de "estourar" seguidos por aventura e ação.
-
-Diretores {data-orientation=columns}
-============================================
-
-Column
--------------------------------------------
-
-### Diretores com mais filmes
-
-Sabemos que o estúdio quer contratar um(a) diretor(a) experiente, para ter menos riscos. Por isso vamos listar os diretores com maior número de filmes realizados.
-
-```{r}
-
-```
-
-Column {.tabset}
---------------------------------
-
-### Notas no IMDB
-
-```{r fig.height=7}
-
-```
-
-### Lucro
-
-```{r fig.height=7}
-
-```
-
-Atores {data-orientation=columns}
-============================================
-
-Column
---------------------------------------------
-
-### Principais atores
-
-O estúdio prefere um ator com certa experiência, que pode ser medida pelo número de filmes. No entanto, não quer deixar a qualidade de lado - quer os atores de participaram com filmes que tiveram boas avaliações.
-
-```{r}
-
-```
-
-# Column
---------------------------------------
-
-### Relação Atores e Diretores
-
-Sabemos que em geral os diretores possuem preferência por alguns atores. Por isso,
-listamos para cada diretor que consideramos anteriormente, o ator que mais trabalhou em conjunto.
-
-```{r}
-
-```
-
-
 
