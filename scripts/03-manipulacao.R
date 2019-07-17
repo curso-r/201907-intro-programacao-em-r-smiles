@@ -1,23 +1,28 @@
-a# Pacotes -----------------------------------------------------------------
+# Pacotes -----------------------------------------------------------------
 
 library(tidyverse)
+library(nycflights13)
 
 # Base de dados -----------------------------------------------------------
 
-imdb <- read_rds("dados/imdb.rds")
+data(flights)
+data(airlines)
+data(airports)
+data(planes)
+data(weather)
 
 # filter ------------------------------------------------------------------
 
 # exemplo 1
-imdb %>% filter(nota_imdb > 9)
+flights %>% filter(month == 1, day == 1)
 
 # exemplo 2
-filmes_bons <- imdb %>% filter(nota_imdb > 9)
-filmes_bons
+jan1 <- flights %>% filter(month == 1, day == 1)
+jan1
 
 # exemplo 3
-filmes_bons <- filmes_bons %>% filter(orcamento < 1000000)
-filmes_bons
+jan1 <- jan1 %>% filter(origin == "JFK")
+jan1
 
 # exemplo 4 - Relembrando as comparações com o R
 
@@ -31,48 +36,40 @@ sqrt(2) ^ 2 == 2
 near(sqrt(2) ^ 2,  2)
 near(1 / 49 * 49, 1)
 
-bons <- imdb %>% filter(nota_imdb > 9)
-
-
 # exercício 1
-# Criar uma variável chamada `filmes_baratos` com filmes com orçamento menor do 
-# que 1 milhão de dólares.
-
+# Criar uma variável chamada `jan_mar` com filmes com os voos de janeiro a março.
 
 
 # exemplo 5
 # operadores lógicos
 
-imdb %>% filter(ano > 2010 & nota_imdb > 8.5)
-imdb %>% filter(orcamento < 100000 & receita > 1000000)
+flights %>% filter(month == 1 & day == 1)
+flights %>% filter(month == 1 & day <= 15)
 
-imdb %>% filter(receita > orcamento)
-imdb %>% filter(receita > orcamento + 500000000)
-imdb %>% filter(receita > orcamento + 500000000 | nota_imdb > 9)
+flights %>% filter(month == 1 | month == 3)
+flights %>% filter(arr_delay >= 180 & dep_delay <= 10)
 
-imdb %>% filter(ano > 2010)
-imdb %>% filter(!ano > 2010)
-imdb %>% filter(!receita > orcamento)
+flights %>% filter(!carrier == "UA")
 
 # exercício 2
-# Criar um objeto chamado bons_baratos com filmes que tiveram nota no imdb 
-# maior do que 8.5 e um orcamento menor do que 1 milhão de dólares.
+# crie um objeto chamado jan_atrasados com os vôos que atrasaram mais de 1h30
+# em janeiro.
+
 
 # exercício 3
-# Criar um objeto chamado curtos_legais com filmes de até 1h30 e nota no imdb
-# maior do que 8.5.
+# crie um objeto chamado voos_aniversario com os vôos que acontteceram no dia
+# do seu aniversario e no dia do aniversario um colega perto de você.
 
 # exercício 4
-# Criar um objeto antigo_colorido com filmes de antes de 1940 que são 
-# coloridos. Crie também um objeto antigo_bw com filmes antigos que não são coloridos.
+# crie um objeto que contenha os vôos que não ocorreram nem em janeiro nem em dezembro.
 
 # exercício 5
-# Criar um objeto ww com filmes do Wes Anderson ou do Woody Allen.
+# crie um objeto com os vôos das companhias UA e AA
 
 # exemplo 6
 # %in%
 
-pitts <- imdb %>% filter(ator_1 %in% c('Angelina Jolie Pitt', "Brad Pitt"))
+california <- flights %>% filter(dest %in% c('SAN', "SFO", "SJC"))
 
 # exercicio 6
 # Refaça o exercício 5 usando o %in%.
@@ -107,38 +104,36 @@ df <- tibble(x = c(1, NA, 3))
 filter(df, x > 1)
 filter(df, is.na(x) | x > 1)
 
-imdb %>% filter(is.na(orcamento))
+flights %>% filter(!is.na(dep_delay))
 
 # exercício 7
-# Identifique os filmes que não possuem informação tanto de receita quanto de orcamento
-# e salve em um objeto com nome sem_info.
+# Tente descobrir porque a informação de atraso pode ser NA.
 
 # exemplo 8
 # str_detect
 
-imdb %>% filter(str_detect(generos, "Action"))
+airports %>% filter(str_detect(tzone, "Los_Angeles"))
 
 # exercício 8
-# Salve em um objeto os filmes de Ação e Comédia com nota no imdb maior do que 8.
-
+# Encontre todas as companhias aéreas que possuem a palavra Airlines no nome.
+# Use a tabela airlines
 
 # arrange -----------------------------------------------------------------
 
 # exemplo 1
 
-imdb %>% arrange(orcamento)
+flights %>% arrange(arr_delay)
 
 # exemplo 2
 
-imdb %>% arrange(desc(orcamento))
+flights %>% arrange(desc(arr_delay))
 
 # exemplo 3
 
-imdb %>% arrange(desc(ano), titulo)
+flights %>% arrange(desc(month), desc(day))
 
 # exercício 1
-# Ordene os filmes em ordem crescente de ano e decrescente de lucro e salve 
-# em um objeto chamado filmes_ordenados
+# Ordene os vôos por ordem descrescente de atraso.
 
 # exemplo 4
 # NA
@@ -146,230 +141,195 @@ imdb %>% arrange(desc(ano), titulo)
 df <- tibble(x = c(NA, 2, 1), y = c(1, 2, 3))
 
 df %>% arrange(x)
-df %>% arrange(!is.na(x), x)
 
 # exemplo 5
 
-imdb %>% filter(ano == 2010) %>% arrange(desc(orcamento))
+flights %>% filter(month == 1) %>% arrange(desc(arr_delay))
 
 # exercício 2 
-# Ordene por ordem decrescente do orçamento os filmes de um diretor a sua escolha.
-# Salve o resultado em um objeto chamado diretor_ordenado
+# ordene por ordem decrescente de atraso os vôos de um dia do ano à sua escolha
 
 # select ------------------------------------------------------------------
 
 # exemplo 1
 
-imdb %>% select(titulo, ano, orcamento)
+flights %>% select(year, month, day)
 
 # exemplo 2 
 
-imdb %>% select(starts_with("ator"))
+flights %>% select(year, month, starts_with("arr"))
 
 # exemplo 3
 
-imdb %>% select(-starts_with("ator"), -titulo)
+flights %>% select(-starts_with("arr"), -year)
 
 # exercício 1
-# Crie uma tabela com apenas as colunas titulo, diretor, e orcamento. Salve em um
-# objeto chamado imdb_simples.
+# crie uma tabela com as colunas year, month, day e air_time
 
 # exercício 2
-# Remova as colunas ator_1, ator_2 e ator_3 de três formas diferentes. Salve em um
-# objeto chamado imdb_sem_ator.
+# remova as colunas arr_delay, dep_delay, arr_time e dep_time de 3 formas 
+# diferentes.
 
 # exercício 3
-# Crie uma tabela apenas com filmes do Woody Allen e as colunas titulo e ano
-# ordenada por ano.
+# crie uma tabela com os vôos de dezembro, ordenada em ordem decrescente de 
+# atraso e apenas com as colunas carrier, flight e arr_delay.
 
 
 # mutate ------------------------------------------------------------------
 
 # exemplo 1
 
-imdb %>% mutate(duracao = duracao/60)
+flights %>% mutate(ganho = dep_delay - arr_delay)
 
 # exemplo 2
 
-imdb %>% mutate(duracao_horas = duracao/60)
+flights %>% mutate(velocidade = distance/air_time)
 
 # exercício 1
-# Crie uma variável chamada lucro. Salve em um objeto chamado imdb_lucro.
+# calcule o tempo do voo em horas
 
 # exercicio 2
-# Modifique a variável lucro para ficar na escala de milhões de dólares.
+# crie uma coluna com a concatenacao da origem com o destino
+# dica: função paste.
 
 # exercício 3
-# Filtre apenas os filmes com prejuízo maior do que 3 milhões de dólares. 
-# Deixe essa tabela ordenada com o maior prejuízo primeiro. Salve o resultado em 
-# um objeto chamado filmes_prejuizo.
+# 1) encontre os vôos de um mês a sua escolha que possuem 
+# 2) calcule a velocidade média desses vôos
+# 3) ordene por ordem decrescente da velocidade média
+# 4) apresente apenas as colunas origem, destino e velocidade
 
 # exemplo 3
-# gêneros
+# datas
 
-# install.packages("gender")
-library(gender)
+library(lubridate)
 
-gender(c("William"), years = 2012)
-gender(c("Robin"), years = 2012)
-
-gender(c("Madison", "Hillary"), years = 1930, method = "ssa")
-gender(c("Madison", "Hillary"), years = 2010, method = "ssa")
-
-gender("Matheus", years = 1920)
-
-obter_genero <- function(nome, ano) {
-  
-  if (is.na(nome) | is.na(ano)) {
-    return(NA_character_)
-  }
-  
-  ano_min <- ano - 60
-  ano_max <- ano - 30
-  
-  if (ano_min < 1880) {
-    ano_min <- 1880
-  }
-  
-  genero <- gender(nome, years = c(ano_min, ano_max), method = "ssa")$gender
-  
-  if(length(genero) == 0) {
-    genero <- NA_character_
-  }
-  
-  genero
-}
-
-obter_genero("Madison", 1930)
-obter_genero("Matheus", 1930)
-
-# demora +- 10 min.
-imdb_generos <- imdb %>%
-  select(diretor, ano) %>%
-  distinct() %>%
-  mutate(
-    diretor_primeiro_nome = str_extract(diretor, ".* ") %>% str_trim(),
-    genero = map2_chr(diretor_primeiro_nome, ano, obter_genero)
-  )
-
-# saveRDS(imdb_generos, "data/imdb_generos.rds")
-imdb_generos <- read_rds("dados/imdb_generos.rds")
-
-# https://github.com/meirelesff/genderBR
+flights %>% 
+  select(month, day, flight, time_hour) %>% 
+  mutate(dia_da_semana = wday(time_hour, label = TRUE)) %>% 
+  filter(dia_da_semana == "Mon")
 
 # summarise ---------------------------------------------------------------
 
 # exemplo 1
 
-imdb %>% summarise(media_orcamento = mean(orcamento, na.rm=TRUE))
+flights %>% summarise(media_atraso = mean(arr_delay, na.rm = TRUE))
 
 # exemplo 2
 
-imdb %>% summarise(
-  media_orcamento = mean(orcamento, na.rm=TRUE),
-  mediana_orcamento = median(orcamento, na.rm = TRUE)
+flights %>% summarise(
+  media_atraso = mean(arr_delay, na.rm = TRUE),
+  dp_atraso = sd(arr_delay, na.rm = TRUE)
 )
 
 # exemplo 3
 
-imdb %>% summarise(
-  media_orcamento = mean(orcamento, na.rm=TRUE),
-  mediana_orcamento = median(orcamento, na.rm = TRUE),
+flights %>% summarise(
+  media_atraso = mean(arr_delay, na.rm = TRUE),
+  dp_atraso = sd(arr_delay, na.rm = TRUE),
   qtd = n(),
-  qtd_diretores = n_distinct(diretor)
+  qtd_companhias = n_distinct(carrier),
+  qtd_destinos = n_distinct(dest)
 )
 
 # exemplo 4
 
-imdb_generos %>%
-  summarise(n_diretora = sum(genero == "female", na.rm = TRUE))
+flights %>%
+  summarise(n_UA = sum(carrier == "UA", na.rm = TRUE))
 
 # exercício 1
-# Use o `summarise` para calcular a proporção de filmes com diretoras.
+# Use o `summarise` para calcular a proporção de vôos que foram feitos pela AA.
 
 # exercício 2
-# Calcule a duração média e mediana dos filmes da base.
+# Calcule a duração média e mediana dos vôos.
 
 # exercício 3
-# Calcule o lucro médio dos filmes com duracao < 60 minutos. E o lucro médio dos filmes com
-# mais de 2 horas.
+# calcule a média, mediana e desvio padrão da velocidade dos vôos
 
 # group_by + summarise ----------------------------------------------------
 
 # exemplo 1
 
-imdb %>% group_by(ano)
+flights %>% group_by(month)
 
 # exemplo 2
 
-imdb %>% 
-  group_by(ano) %>% 
-  summarise(qtd_filmes = n())
+flights %>% 
+  group_by(month) %>% 
+  summarise(qtd_voos = n())
 
 # exemplo 3
 
-imdb %>% 
-  group_by(diretor) %>% 
-  summarise(qtd_filmes = n())
+flights %>% 
+  group_by(month, day) %>% 
+  summarise(qtd_voos = n())
 
 # exercício 1
-# Crie uma tabela com apenas o nome dos diretores com mais de 10 filmes.
+# Crie uma tabela com a quantidade de voos por dia da semana
 
 # exercício 2
-# Crie uma tabela com a receita média e mediana dos filmes por ano.
+# Crie uma tabela com o atraso médio e mediano por companhia aérea
 
 # exercício 3
-# Crie uma tabela com a nota média do imdb dos filmes por tipo de classificacao.
+# Crie uma tabela com o atraso médio e mediano por hora do vôo
 
 # exemplo 4
 
-imdb %>%
-  filter(str_detect(generos, "Action"), !is.na(diretor)) %>%
-  group_by(diretor) %>%
-  summarise(qtd_filmes = n()) %>%
-  arrange(desc(qtd_filmes))
+flights %>% 
+  group_by(dest) %>% 
+  summarise(atraso_medio = mean(arr_delay, na.rm = TRUE)) %>% 
+  filter(atraso_medio > 30)
 
 # exemplo 5
 
-imdb %>% 
-  filter(ator_1 %in% c("Brad Pitt", "Angelina Jolie Pitt")) %>%
-  group_by(ator_1) %>%
-  summarise(orcamento = mean(orcamento), receita = mean(receita), qtd = n())
+flights %>% 
+  mutate(dia_da_semana = wday(time_hour, label = TRUE)) %>% 
+  filter(dia_da_semana == "Mon") %>% 
+  group_by(dest) %>% 
+  summarise(atraso_medio = mean(arr_delay, na.rm = TRUE)) %>% 
+  arrange(desc(atraso_medio))
 
 # left join ---------------------------------------------------------------
 
 # exemplo 1
 
-imdb_generos2 <- imdb %>%
-  left_join(imdb_generos, by = c("titulo", "diretor", "ano"))
+flights2 <-  flights %>% 
+  left_join(airlines, by = c("carrier" = "carrier"))
 
 # exemplo 2
 
-depara_cores <- tibble(
-  cor = c("Color", "Black and White"),
-  cor2 = c("colorido", "pretoEbranco")
-)
-
-imdb_cor <- left_join(imdb, depara_cores, by = c("cor"))
+airports %>% 
+  filter(str_detect(tzone, "Los_Angeles")) %>% 
+  select(faa) %>% 
+  inner_join(flights, by = c("faa" = "dest"))
 
 # exemplo 3
 
-imdb_generos3 <- imdb %>%
-  left_join(imdb_generos, by = c("diretor", "ano"))
+weather %>% 
+  group_by(month, day) %>% 
+  summarise(
+    temp = mean(temp, na.rm = TRUE),
+    wind_speed = mean(wind_speed, na.rm = TRUE)
+    ) %>% 
+  right_join(flights, by = c("month", "day"))
+
 
 # exercicio 1
-# Calcule a média dos orçamentos e receitas para filmes feitos por
-# genero do diretor.
+# descubra as companhias que fazem mais vôos com aviões da EMBRAER
 
 # gather ------------------------------------------------------------------
 
 # exemplo 1
 
-imdb_gather <- gather(imdb, "importancia_ator", "nome_ator", starts_with("ator"))
+flights %>% 
+  group_by(origin, dest) %>% 
+  summarise(n = n()) %>% 
+  spread(origin, n, fill = 0)
 
 # spread ------------------------------------------------------------------
 
 # exemplo 1
 
-imdb <- spread(imdb_gather, importancia_ator, nome_ator)
+weather %>% 
+  select(year, month, day, wind_dir, wind_speed, wind_gust) %>% 
+  gather(wind_attr, value, starts_with("wind"))
 
