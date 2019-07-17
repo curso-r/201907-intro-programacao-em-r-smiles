@@ -12,41 +12,43 @@ getwd()
 # Principais formatos -----------------------------------------------------
 
 # Arquivos de texto
-imdb <- read_csv(file = "dados/imdb.csv")
-imdb2 <- read_delim("dados/imdb2.csv", delim = ";")
+flights <- read_csv(file = "dados/flights.csv")
+flights2 <- read_delim("dados/flights2.csv", delim = ";")
 
 # Excel
 library(readxl)
-imdb_excel <- read_excel("dados/imdb.xlsx")
+flights_excel <- read_excel("dados/flights.xlsx")
 
 # SQL ---------------------------------------------------------------------
 
-conexao <- src_sqlite("dados/imdb.sqlite", create = TRUE)
-# copy_to(conexao, imdb, temporary = FALSE)
+conexao <- src_sqlite("dados/flights.sqlite")
+conexao
 
-imdb_sqlite <- tbl(conexao, "imdb")
-imdb_select <- tbl(conexao, sql("SELECT titulo, ano, diretor FROM imdb"))
+flights_sqlite <- tbl(conexao, "flights")
+flights_select <- tbl(conexao, sql("SELECT year, month, day, dep_time FROM flights"))
 
 # trazer para a memória
-collect(imdb_sqlite)
-collect(imdb_select)
+collect(flights_sqlite)
+collect(flights_select)
 
 # db.rstudio.com
 
 # Outros formatos ---------------------------------------------------------
 
 library(jsonlite)
-imdb_json <- read_json("dados/imdb.json")
+flights_json <- read_json("dados/flights.json")
 
 library(haven)
 
-imdb_sas <- read_sas("dados/imdb.sas7bdat")
-imdb_spss <- read_spss("dados/imdb.sav")
-
-# pacote rio
-library(rio)
-imdb_rio <- rio::import("dados/imdb.xlsx")
+flights_sas <- read_sas("dados/flights.sasb7dat")
+flights_spss <- read_spss("dados/flights.sav")
 
 # data.table
 library(data.table)
-imdb_dt <- fread("dados/imdb.csv")
+flights_dt <- fread("dados/flights.csv")
+
+# vroom
+library(vroom)
+flights_vroom <- vroom("dados/flights.csv")
+
+
