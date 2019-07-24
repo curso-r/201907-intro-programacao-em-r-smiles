@@ -31,7 +31,7 @@ class: middle, center
 - Curso-R surge oficialmente em 2017
 
 - Mais de 20 cursos e 300 alunos
-
+       
 ---
 class: middle, center
 
@@ -350,7 +350,6 @@ class: middle, center
 ## Ciclo da ciência de dados
 
 <img src="img/ciclo-ciencia-de-dados.png" style = "display: block; margin-left: auto; margin-right: auto;">
-
 
 ---
 class: middle

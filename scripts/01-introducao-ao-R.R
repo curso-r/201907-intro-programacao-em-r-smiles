@@ -26,9 +26,9 @@ A <- 42
 
 # Vetores são conjuntos ordenados de números
 
-c(1, 4, 3, 10)
+vetor <- c(1, 4, 3, 10)
 
-1:10
+vetor <- 1:10
 
 # Subsetting
 
@@ -38,6 +38,7 @@ vetor[1]
 vetor[c(1, 3)]
 vetor[-5]
 vetor[-c(1, 3)]
+vetor[vetor %% 2 == 0]
 
 # Tipos -------------------------------------------------------------------
 
@@ -71,15 +72,14 @@ mean(seq(1, 10, 2))
 
 # Guardando as saídas
 
-y <- seq(1, 10, length.out = 5)
+y <-  seq(1, 10, length.out = 5)
 y
 
 # Criando funções
 
-minha_soma <- function(x, y) {
+minha_soma <-  function(x, y) {
   
-  x + y
-  
+  return(x + y)
 }
 
 minha_soma(2, 3)
@@ -89,24 +89,28 @@ minha_soma(2, 3)
 minha_soma2 <- function(x, y) {
   
   x <- x^2
-  y <-y^2
+  y <- y^2
   
   soma <- x + y
   
   return(soma)
   
 }
-
-minha_soma2(1, 2)
+x <- 2
+y <- 2
+minha_soma2(x, y)
 
 
 # Comparações lógicas ------------------------------------------------------
 
-1 > 0
-2 < 1
-3 == 3
-3 != 1
+1 >= 0
+2 <= 1
+!(3 == 3 )
+!(3 == 1)
 5 %in% c(2, 4, 5)
+
+library(stringr)
+str_detect(c("lala", "blabl"), "^b.*a$")
 
 # Valores especiais -------------------------------------------------------
 
@@ -126,8 +130,6 @@ NULL # representa a ausência de informação.
 # Use as funções is.na(), is.nan(), is.infinite() e is.null() 
 # para testar se um objeto é um desses valores.
 
-1 == NA
-
 is.na(NA)
 
 a <- NA
@@ -135,7 +137,10 @@ is.na(NA)
 
 # Identação ---------------------------------------------------------------
 
-funcao_com_muitos_argumentos(argumento_1 = 10, argumento_2 = 14, argumento_3 = 30, argumento_4 = 11)
+funcao_com_muitos_argumentos(
+  argumento_1 = 10, argumento_2 = 14, argumento_3 = 30,
+  argumento_4 = 11
+)
 
 # ATALHO: CTRL+I
 
@@ -165,6 +170,15 @@ library(tidyverse)
 # O pipe é a força da gravidade dentro do tidyverse.
 
 # Pipe (%>%) --------------------------------------------------------------
+
+funcao <- function(x, y) {
+  x + y
+}
+
+funcao(funcao(funcao(funcao(1, 3), 4)))
+1 %>% 
+  funcao(y = 3) %>% 
+  funcao(y = 3)
 
 # Receita de bolo sem pipe. Tente entender o que é preciso fazer.
 
@@ -205,7 +219,7 @@ recipiente(rep("farinha", 2), "água", "fermento", "leite", "óleo") %>%
 
 # Controles de fluxo ------------------------------------------------------
 
-x <- 0
+x <- -1
 
 if(x < 0) {
   "negativo"
@@ -221,25 +235,40 @@ if(x < 0) {
 x <- -10:30
 
 x_categorizado <- ifelse(x < 0, "negativo", "positivo")
+library(tidyverse)
 
+case_when(
+  x < 0 ~ - x,
+  x == 0 ~ x,
+  x > 1 ~ x,
+  1== 1 ~ x
+)
 
 # Operações vetoriais  -----------------------------------------------------
 
 a <- 1:3
-b <- 4:9
+b <- 4:10
 
 a + 1
 b * 2
+a
+b
 a + b
-
 
 # Coerção ------------------------------------------------------------------
 
-class(c(1, 2, 3))
+class(c(1L, 2L, 3L))
 
 c(1, 2, 3, "a")
 c(TRUE, FALSE, "a")
 c(1L, 2L, "a")
+
+idades <- c(30, 32, 26, 29, 56)
+sum(idades > 30)
+
+
+mean(c(TRUE, TRUE, FALSE))
+
 c(TRUE, FALSE, 1)
 
 # logico < inteiro < numerico < caracter

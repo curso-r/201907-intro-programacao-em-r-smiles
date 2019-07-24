@@ -4,7 +4,7 @@ library(tidyverse)
 # Caminhos até o arquivo --------------------------------------------------
 
 # 1. Podem ser absolutos
-"/home/william/Documents/Curso-R/intro-programacao-em-r-mestre/dados/imdb.csv"
+"~/Documents/"
 
 # 2. Podem ser relativos ao diretório de trabalho
 getwd()
@@ -12,6 +12,7 @@ getwd()
 # Principais formatos -----------------------------------------------------
 
 # Arquivos de texto
+library(readr)
 flights <- read_csv(file = "dados/flights.csv")
 flights2 <- read_delim("dados/flights2.csv", delim = ";")
 
@@ -25,6 +26,11 @@ conexao <- src_sqlite("dados/flights.sqlite")
 conexao
 
 flights_sqlite <- tbl(conexao, "flights")
+
+x <- flights_sqlite %>% 
+  filter(month == 1, day == 31)
+show_query(x)
+
 flights_select <- tbl(conexao, sql("SELECT year, month, day, dep_time FROM flights"))
 
 # trazer para a memória
