@@ -15,7 +15,7 @@ library(lubridate)
 library(ggridges)
 library(nycflights13)
 
-flights <- flights %>% filter(month == 1)
+   flights <- flights %>% filter(month == 1)
 ```
 
 Visão geral
