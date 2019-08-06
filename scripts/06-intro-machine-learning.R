@@ -35,6 +35,7 @@ modelo <- lm(y ~ x, data = df_train)
 summary(modelo)
 
 df$predicao <- predict(modelo, df)
+
 df %>% 
   group_by(is_train) %>% 
   summarise(rmse = sqrt(mean((predicao - y)^2)))
@@ -102,7 +103,7 @@ for(i in 1:n_vezes) {
       alpha = 0.01,
       color = "red",
       method = "lm", se = FALSE, 
-      formula = y ~ poly(x, 20, raw = TRUE)
+      formula = y ~ poly(x, 3, raw = TRUE)
     )
 }
 
@@ -111,8 +112,8 @@ gg + coord_cartesian(ylim = c(0, 1000))
 
 # Qual o efeito do tamanho da amostra?
 
-df <- criar_amostra(1000, 0.5)
-erros <- ajustar_polinomios(df, seq(1, 200, by = 5))
+df <- criar_amostra(10000, 0.5)
+erros <- ajustar_polinomios(df, seq(1, 50, by = 5))
 ggplot(erros, aes(x = grau, y = mse)) + 
   geom_line() + 
   geom_point(
@@ -169,7 +170,7 @@ ggplot(erros2, aes(x = grau, y = media)) +
 
 
 # Recipes + Caret ---------------------------------------------------------
-
+# MLR
 
 # exemplo 1
 
@@ -183,25 +184,30 @@ diamantes <- diamantes %>%
     clarity = as.character(clarity)
   )
 
+skim(diamantes)
+
+library(recipes)
 
 receita <- recipe(price ~ ., data = diamantes) %>%
   step_dummy(all_nominal()) %>%
   step_nzv(all_predictors()) %>%
   step_corr(all_predictors())
+
 prep <- prep(receita, diamantes)
 base_treino <- bake(prep, diamantes)
 ajuste <- lm(price ~ ., base_treino)
 summary(ajuste)
 
 # exemplo 2
+library(caret)
 
-set.seed(20032019)
 modelo <- train(
   receita, 
   diamantes, 
   method = "lm",
   trControl = trainControl(method = "cv", number = 5)
 )
+
 modelo
 # Para acessar o modelo final
 summary(modelo$finalModel)
@@ -246,15 +252,19 @@ receita <- recipe(Status ~ ., data = credit_data) %>%
   step_dummy(all_nominal(), -all_outcomes()) %>%
   step_corr(all_predictors()) %>%
   step_nzv(all_predictors())
+
+
 modelo <- train(
   receita, 
   credit_data, 
-  method = "glm", 
+  method = "glmnet", 
   family = "binomial", 
-  trControl = trainControl(method = "cv", number = 5)
+  #tuneGrid = expand.grid(alpha = c(0), lambda = c(0.1, 0.5, 0.99)),
+  trControl = trainControl(method = "cv", number = 5, classProbs = TRUE, 
+                           summaryFunction = twoClassSummary)
 )
-modelo
-varImp(modelo)
+plot(modelo)
+coef(modelo$finalModel)
 
 
 # Random Forest -----------------------------------------------------------
@@ -291,6 +301,8 @@ train_control_rf <- trainControl(
 grid_rf <- data.frame(
   mtry = c(2, 3, 4, 5, 6, 7)
 )
+
+
 modelo_rf <- train(
   receita, 
   credit_data_treino, 
